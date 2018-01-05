@@ -15,9 +15,13 @@ declare function xq3:sliding-window(
   let $windows as map:map := map:map(),
     $sequence-size as xs:unsignedInt := fn:count($sequence)
   for $item at $pos in $sequence
+  let $prev := fn:subsequence($sequence, $pos - 1, 1)
+  let $next := fn:subsequence($sequence, $pos + 1, 1)
   let $start as xs:boolean :=
                     ((fn:not($only-start) and 1 eq $pos) or
                     (switch (fn:function-arity($start-condition))
+                    case 4 return $start-condition($item,$pos, $prev, $next)
+                    case 3 return $start-condition($item,$pos, $prev)
                     case 2 return $start-condition($item,$pos)
                     default return $start-condition($item))
                     ),
@@ -35,6 +39,8 @@ declare function xq3:sliding-window(
       $end as xs:boolean :=
                     ((fn:not($only-end) and $sequence-size eq $pos) or
                     (switch (fn:function-arity($end-condition))
+                    case 6 return $end-condition($item,$pos,map:get($window-map,'start'),map:get($window-map,'start-pos'), $prev, $next)
+                    case 5 return $end-condition($item,$pos,map:get($window-map,'start'),map:get($window-map,'start-pos'), $prev)
                     case 4 return $end-condition($item,$pos,map:get($window-map,'start'),map:get($window-map,'start-pos'))
                     case 3 return $end-condition($item,$pos,map:get($window-map,'start'))
                     case 2 return $end-condition($item,$pos)
@@ -70,9 +76,13 @@ declare function xq3:tumbling-window(
   let $map as map:map := map:map(),
     $sequence-size as xs:unsignedInt := fn:count($sequence)
   for $item at $pos in $sequence
+  let $prev := fn:subsequence($sequence, $pos - 1, 1)
+  let $next := fn:subsequence($sequence, $pos + 1, 1)
   let $start as xs:boolean :=
                     ((fn:not($only-start) and 1 eq $pos) or
                     (switch (fn:function-arity($start-condition))
+                    case 4 return $start-condition($item,$pos, $prev, $next)
+                    case 3 return $start-condition($item,$pos, $prev)
                     case 2 return $start-condition($item,$pos)
                     default return $start-condition($item))
                     ),
@@ -81,6 +91,8 @@ declare function xq3:tumbling-window(
     $end as xs:boolean :=
                     ((fn:not($only-end) and $sequence-size eq $pos) or
                     (switch (fn:function-arity($end-condition))
+                    case 6 return $end-condition($item,$pos,map:get($map,'start'),map:get($map,'start-pos'), $prev, $next)
+                    case 5 return $end-condition($item,$pos,map:get($map,'start'),map:get($map,'start-pos'), $prev)
                     case 4 return $end-condition($item,$pos,map:get($map,'start'),map:get($map,'start-pos'))
                     case 3 return $end-condition($item,$pos,map:get($map,'start'))
                     case 2 return $end-condition($item,$pos)
